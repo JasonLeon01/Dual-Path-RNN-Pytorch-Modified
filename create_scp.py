@@ -8,13 +8,13 @@ test_mix_scp = 'tt_mix.scp'
 test_s1_scp = 'tt_s1.scp'
 test_s2_scp = 'tt_s2.scp'
 
-train_mix = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/tr/mix'
-train_s1 = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/tr/s1'
-train_s2 = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/tr/s2'
+train_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/train/mix_clean'
+train_s1 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/train/s1'
+train_s2 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/train/s2'
 
-test_mix = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/tt/mix'
-test_s1 = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/tt/s1'
-test_s2 = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/tt/s2'
+test_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/test/mix'
+test_s1 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/test/s1'
+test_s2 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/test/s2'
 
 tr_mix = open(train_mix_scp,'w')
 for root, dirs, files in os.walk(train_mix):
@@ -68,9 +68,9 @@ cv_mix_scp = 'cv_mix.scp'
 cv_s1_scp = 'cv_s1.scp'
 cv_s2_scp = 'cv_s2.scp'
 
-cv_mix = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/cv/mix'
-cv_s1 = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/cv/s1'
-cv_s2 = '/home/likai/likai/Dataset/wsj0-mix/2speakers/wav8k/min/cv/s2'
+cv_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/dev/mix'
+cv_s1 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/dev/s1'
+cv_s2 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/dev/s2'
 
 cv_mix_file = open(cv_mix_scp,'w')
 for root, dirs, files in os.walk(cv_mix):

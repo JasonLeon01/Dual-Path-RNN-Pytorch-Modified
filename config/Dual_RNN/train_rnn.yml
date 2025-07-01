@@ -5,12 +5,12 @@ num_spks: 2
 #### datasets
 datasets:
   train:
-    dataroot_mix: /home/likai/data1/create_scp/tr_mix.scp
-    dataroot_targets: [/home/likai/data1/create_scp/tr_s1.scp,/home/likai/data1/create_scp/tr_s2.scp]
+    dataroot_mix: /home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/tr_mix.scp
+    dataroot_targets: [/home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/tr_s1.scp,/home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/tr_s2.scp]
 
   val:
-    dataroot_mix: /home/likai/data1/create_scp/cv_mix.scp
-    dataroot_targets: [/home/likai/data1/create_scp/cv_s1.scp,/home/likai/data1/create_scp/cv_s2.scp]
+    dataroot_mix: /home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/cv_mix.scp
+    dataroot_targets: [/home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/cv_s1.scp,/home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/cv_s2.scp]
 
   dataloader_setting:
     shuffle: true
@@ -41,7 +41,7 @@ Dual_Path_RNN:
 train:
   epoch: 100
   early_stop: 10
-  path: /home/likai/data1/Dual-Path-RNN/checkpoint
+  path: /home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/checkpoint
   gpuid: [0,1,2,3,4,5,6,7]
 
 #### Optimizer settings
@@ -61,13 +61,13 @@ scheduler:
 #### Resume training settings
 resume:
   state: false
-  path: /home/likai/data1/Dual-Path-RNN/checkpoint
+  path: /home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/checkpoint
 
 
 #### logger
 logger:
   name: DPCL
-  path: /home/likai/data1/Dual-Path-RNN/checkpoint
+  path: /home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/checkpoint
   screen: true
   tofile: false
   print_freq: 1000
