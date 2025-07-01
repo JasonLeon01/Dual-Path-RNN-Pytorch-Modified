@@ -215,8 +215,10 @@ class Dual_RNN_Block(nn.Module):
         intra_rnn = self.intra_norm(intra_rnn)
 
 #########################################################################################
-        attention_input = intra_rnn.permute(2, 0, 1, 3).contiguous().view(K, B*N, S)
-        attention_output, _ = self.attention(attention_input, attention_input, attention_input)
+        B, N, K, S = intra_rnn.shape
+        attention_input = intra_rnn.permute(0, 2, 1, 3).contiguous()
+        attention_input = attention_input.view(B*K, N, S)
+        self.attention = nn.MultiheadAttention(embed_dim=S, num_heads=8)
         # [K, B*N, S] -> [B, N, K, S]
         attention_output = attention_output.view(K, B, N, S).permute(0, 2, 1, 3).contiguous()
 
