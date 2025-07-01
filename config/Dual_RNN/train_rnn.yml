@@ -39,7 +39,7 @@ Dual_Path_RNN:
 
 #### training settings: learning rate scheme, loss
 train:
-  epoch: 100
+  epoch: 20
   early_stop: 10
   path: /home/liguozheng/liufengming2023/Dual-Path-RNN-Pytorch-Modified/checkpoint
   gpuid: [0,1,2,3,4,5,6,7]

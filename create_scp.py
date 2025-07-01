@@ -12,7 +12,7 @@ train_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/train/mix_clean
 train_s1 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/train/s1'
 train_s2 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/train/s2'
 
-test_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/test/mix'
+test_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/test/mix_clean'
 test_s1 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/test/s1'
 test_s2 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/test/s2'
 
@@ -68,7 +68,7 @@ cv_mix_scp = 'cv_mix.scp'
 cv_s1_scp = 'cv_s1.scp'
 cv_s2_scp = 'cv_s2.scp'
 
-cv_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/dev/mix'
+cv_mix = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/dev/mix_clean'
 cv_s1 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/dev/s1'
 cv_s2 = '/home/liguozheng/liufengming2023/Dataset/Custom2Mix/dev/s2'
 
