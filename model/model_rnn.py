@@ -184,12 +184,6 @@ class Dual_RNN_Block(nn.Module):
         self.cross_attention = nn.MultiheadAttention(embed_dim=out_channels, num_heads=8)
         self.cross_gate_conv = nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=1)
         self.cross_gate_sigmoid = nn.Sigmoid()
-        self.dim_adapter = nn.Sequential(
-            nn.Linear(258, out_channels*2),
-            nn.ReLU(),
-            nn.Linear(out_channels*2, out_channels),
-            nn.Dropout(0.1)
-        )
 
 #########################################################################################
         # Norm
@@ -222,11 +216,17 @@ class Dual_RNN_Block(nn.Module):
         intra_rnn = self.intra_norm(intra_rnn)
 
 #########################################################################################
-        attention_input = intra_rnn.permute(2, 0, 1, 3).contiguous().view(K, B*N, S)
-        attention_input = self.dim_adapter(attention_input)
+        # reshape for attention: treat (K * S) as sequence, BN as batch
+        intra_rnn_reshaped = intra_rnn.permute(0, 2, 3, 1).contiguous()  # [B, K, S, N]
+        intra_rnn_reshaped = intra_rnn_reshaped.view(B * K, S, N)  # [B*K, S, N]
+
+        # transpose to [S, B*K, N] for MultiheadAttention (sequence first)
+        attention_input = intra_rnn_reshaped.transpose(0, 1)  # [S, B*K, N]
         attention_output, _ = self.attention(attention_input, attention_input, attention_input)
-        # [K, B*N, S] -> [B, N, K, S]
-        attention_output = attention_output.view(K, B, N, S).permute(0, 2, 1, 3).contiguous()
+
+        # back to [B, N, K, S]
+        attention_output = attention_output.transpose(0, 1).contiguous().view(B, K, S, N)
+        attention_output = attention_output.permute(0, 3, 1, 2).contiguous()  # [B, N, K, S]
 
         # [B, N, K, S]
         intra_rnn = intra_rnn + attention_output
@@ -252,25 +252,28 @@ class Dual_RNN_Block(nn.Module):
         inter_rnn = self.inter_norm(inter_rnn)
 
         #########################################################################################
-        # Reshape intra_rnn for attention computation
-        intra_rnn_reshaped = intra_rnn.permute(2, 0, 1, 3).contiguous().view(K, B*N, S)
-        # Reshape inter_rnn for attention computation
-        inter_rnn_reshaped = inter_rnn.permute(2, 0, 1, 3).contiguous().view(K, B*N, S)
+        # [B, N, K, S] -> [B, K, S, N] -> [B*K, S, N]
+        query = inter_rnn.permute(0, 2, 3, 1).contiguous().view(B * K, S, N)
+        key   = intra_rnn.permute(0, 2, 3, 1).contiguous().view(B * K, S, N)
+        value = intra_rnn.permute(0, 2, 3, 1).contiguous().view(B * K, S, N)
 
-        # Compute cross attention
-        # The attention function uses inter_rnn as query and intra_rnn as key and value
-        cross_attention_output, _ = self.cross_attention(inter_rnn_reshaped, intra_rnn_reshaped, intra_rnn_reshaped)
+        # transpose to [S, B*K, N]
+        query = query.transpose(0, 1)   # [S, B*K, N]
+        key   = key.transpose(0, 1)
+        value = value.transpose(0, 1)
 
-        # Reshape the output back to original dimensions
-        # [K, B*N, S] -> [B, N, K, S]
-        cross_attention_output = cross_attention_output.view(K, B, N, S).permute(0, 2, 1, 3).contiguous()
+        cross_attention_output, _ = self.cross_attention(query, key, value)
 
-        # Add the cross attention output to inter_rnn
+        cross_attention_output = cross_attention_output.transpose(0, 1).contiguous().view(B, K, S, N)
+        cross_attention_output = cross_attention_output.permute(0, 3, 1, 2).contiguous()  # [B, N, K, S]
+
         inter_rnn = inter_rnn + cross_attention_output
 
-        # Apply gate to the updated inter_rnn
-        cross_gate = self.cross_gate_sigmoid(self.cross_gate_conv(inter_rnn.view(B*S, N, K)))
-        inter_rnn = inter_rnn * cross_gate.view(B, S, K, N).permute(0, 3, 2, 1).contiguous()
+        # Apply gate
+        gate_input = inter_rnn.view(B * S, N, K)  # [B*S, N, K]
+        cross_gate = self.cross_gate_sigmoid(self.cross_gate_conv(gate_input))  # [B*S, N, K]
+        cross_gate = cross_gate.view(B, S, N, K).permute(0, 2, 3, 1).contiguous()  # [B, N, K, S]
+        inter_rnn = inter_rnn * cross_gate
         #########################################################################################
 
         # [B, N, K, S]
