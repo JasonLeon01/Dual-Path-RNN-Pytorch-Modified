@@ -36,7 +36,7 @@ class Trainer(object):
             self.device = torch.device(
                 'cuda:{}'.format(opt['train']['gpuid'][0]))
             self.gpuid = opt['train']['gpuid']
-            self.dualrnn = self.dualrnn = torch.nn.DataParallel(Dual_RNN.to(self.device), device_ids=self.gpuid)
+            self.dualrnn = torch.nn.DataParallel(Dual_RNN.to(self.device), device_ids=self.gpuid)
             self.logger.info(
                 'Loading Dual-Path-RNN parameters: {:.3f} Mb'.format(check_parameters(self.dualrnn)))
         else:
@@ -52,8 +52,11 @@ class Trainer(object):
             self.cur_epoch = ckp['epoch']
             self.logger.info("Resume from checkpoint {}: epoch {:.3f}".format(
                 opt['resume']['path'], self.cur_epoch))
-            self.dualrnn.module.load_state_dict(ckp['model_state_dict'])
-            self.dualrnn = Dual_RNN.to(self.device)
+            if hasattr(self.dualrnn, 'module'):
+                self.dualrnn.module.load_state_dict(ckp['model_state_dict'])
+            else:
+                self.dualrnn.load_state_dict(ckp['model_state_dict'])
+            # self.dualrnn = Dual_RNN.to(self.device)
             optimizer.load_state_dict(ckp['optim_state_dict'])
             self.optimizer = optimizer(self.dualrnn.module.parameters())
             lr = self.optimizer.param_groups[0]['lr']
@@ -83,8 +86,8 @@ class Trainer(object):
             self.optimizer.zero_grad()
 
             if self.gpuid:
-                out = torch.nn.parallel.data_parallel(self.dualrnn,mix,device_ids=self.gpuid)
-                #out = self.dualrnn(mix)
+                # out = torch.nn.parallel.data_parallel(self.dualrnn,mix,device_ids=self.gpuid)
+                out = self.dualrnn(mix)
             else:
                 out = self.dualrnn(mix)
 
@@ -127,7 +130,7 @@ class Trainer(object):
                 if self.gpuid:
                     #model = torch.nn.DataParallel(self.dualrnn)
                     #out = model(mix)
-                    out = torch.nn.DataParallel(self.dualrnn, device_ids=self.gpuid)(mix)
+                    out = self.dualrnn(mix)#torch.nn.DataParallel(self.dualrnn, device_ids=self.gpuid)(mix)
                 else:
                     out = self.dualrnn(mix)
 
