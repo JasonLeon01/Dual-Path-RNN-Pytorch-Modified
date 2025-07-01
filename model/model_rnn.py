@@ -184,6 +184,13 @@ class Dual_RNN_Block(nn.Module):
         self.cross_attention = nn.MultiheadAttention(embed_dim=out_channels, num_heads=8)
         self.cross_gate_conv = nn.Conv1d(out_channels, out_channels, kernel_size=3, padding=1)
         self.cross_gate_sigmoid = nn.Sigmoid()
+        self.dim_adapter = nn.Sequential(
+            nn.Linear(258, out_channels*2),
+            nn.ReLU(),
+            nn.Linear(out_channels*2, out_channels),
+            nn.Dropout(0.1)
+        )
+
 #########################################################################################
         # Norm
         self.intra_norm = select_norm(norm, out_channels, 4)
@@ -215,15 +222,8 @@ class Dual_RNN_Block(nn.Module):
         intra_rnn = self.intra_norm(intra_rnn)
 
 #########################################################################################
-        out_channels = 64
-        dim_adapter = nn.Sequential(
-            nn.Linear(S, out_channels*2),
-            nn.ReLU(),
-            nn.Linear(out_channels*2, out_channels),
-            nn.Dropout(0.1)
-        )
         attention_input = intra_rnn.permute(2, 0, 1, 3).contiguous().view(K, B*N, S)
-        attention_input = dim_adapter(attention_input)
+        attention_input = self.dim_adapter(attention_input)
         attention_output, _ = self.attention(attention_input, attention_input, attention_input)
         # [K, B*N, S] -> [B, N, K, S]
         attention_output = attention_output.view(K, B, N, S).permute(0, 2, 1, 3).contiguous()
