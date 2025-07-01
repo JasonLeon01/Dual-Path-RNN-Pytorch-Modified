@@ -36,7 +36,7 @@ class Trainer(object):
             self.device = torch.device(
                 'cuda:{}'.format(opt['train']['gpuid'][0]))
             self.gpuid = opt['train']['gpuid']
-            self.dualrnn = Dual_RNN.to(self.device)
+            self.dualrnn = self.dualrnn = torch.nn.DataParallel(Dual_RNN.to(self.device), device_ids=self.gpuid)
             self.logger.info(
                 'Loading Dual-Path-RNN parameters: {:.3f} Mb'.format(check_parameters(self.dualrnn)))
         else:
@@ -52,11 +52,10 @@ class Trainer(object):
             self.cur_epoch = ckp['epoch']
             self.logger.info("Resume from checkpoint {}: epoch {:.3f}".format(
                 opt['resume']['path'], self.cur_epoch))
-            Dual_RNN.load_state_dict(
-                ckp['model_state_dict'])
+            self.dualrnn.module.load_state_dict(ckp['model_state_dict'])
             self.dualrnn = Dual_RNN.to(self.device)
             optimizer.load_state_dict(ckp['optim_state_dict'])
-            self.optimizer = optimizer
+            self.optimizer = optimizer(self.dualrnn.module.parameters())
             lr = self.optimizer.param_groups[0]['lr']
             self.adjust_learning_rate(self.optimizer, lr*0.5)
         else:
@@ -128,10 +127,10 @@ class Trainer(object):
                 if self.gpuid:
                     #model = torch.nn.DataParallel(self.dualrnn)
                     #out = model(mix)
-                    out = torch.nn.parallel.data_parallel(self.dualrnn,mix,device_ids=self.gpuid)
+                    out = torch.nn.DataParallel(self.dualrnn, device_ids=self.gpuid)(mix)
                 else:
                     out = self.dualrnn(mix)
-                
+
                 l = Loss(out, ref)
                 epoch_loss = l
                 total_loss += epoch_loss.item()
@@ -154,7 +153,7 @@ class Trainer(object):
             self.save_checkpoint(self.cur_epoch, best=False)
             v_loss = self.validation(self.cur_epoch)
             best_loss = v_loss
-            
+
             self.logger.info("Starting epoch from {:d}, loss = {:.4f}".format(
                 self.cur_epoch, best_loss))
             no_improve = 0

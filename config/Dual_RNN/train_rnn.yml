@@ -11,22 +11,22 @@ datasets:
   val:
     dataroot_mix: /home/likai/data1/create_scp/cv_mix.scp
     dataroot_targets: [/home/likai/data1/create_scp/cv_s1.scp,/home/likai/data1/create_scp/cv_s2.scp]
-  
+
   dataloader_setting:
     shuffle: true
     num_workers: 1  # per GPU
     batch_size: 1
-  
+
   audio_setting:
     sample_rate: 8000
     chunk_size: 32000
     least_size: 16000
-    
+
 
 #### network structures
 Dual_Path_RNN:
   in_channels: 256
-  out_channels: 64 
+  out_channels: 64
   hidden_channels: 128
   kernel_size: 2
   rnn_type: LSTM
@@ -42,7 +42,7 @@ train:
   epoch: 100
   early_stop: 10
   path: /home/likai/data1/Dual-Path-RNN/checkpoint
-  gpuid: [7]
+  gpuid: [0,1,2,3,4,5,6,7]
 
 #### Optimizer settings
 optim:
