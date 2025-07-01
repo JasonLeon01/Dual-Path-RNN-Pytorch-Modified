@@ -18,7 +18,7 @@ datasets:
     batch_size: 1
 
   audio_setting:
-    sample_rate: 8000
+    sample_rate: 16000
     chunk_size: 32000
     least_size: 16000
 

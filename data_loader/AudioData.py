@@ -13,9 +13,9 @@ def read_wav(fname, return_rate=False):
                fname: wav file path
                return_rate: Whether to return the sampling rate
          output:
-                src: output tensor of size C x L 
-                     L is the number of audio frames 
-                     C is the number of channels. 
+                src: output tensor of size C x L
+                     L is the number of audio frames
+                     C is the number of channels.
                 sr: sample rate
     '''
     src, sr = torchaudio.load(fname, channels_first=True)
@@ -43,14 +43,14 @@ class AudioReader(object):
         Class that reads Wav format files
         Input:
             scp_path (str): a different scp file address
-            sample_rate (int, optional): sample rate (default: 8000)
+            sample_rate (int, optional): sample rate (default: 16000)
             chunk_size (int, optional): split audio size (default: 32000(4 s))
             least_size (int, optional): Minimum split size (default: 16000(2 s))
         Output:
             split audio (list)
     '''
 
-    def __init__(self, scp_path, sample_rate=8000, chunk_size=32000, least_size=16000):
+    def __init__(self, scp_path, sample_rate=16000, chunk_size=32000, least_size=16000):
         super(AudioReader, self).__init__()
         self.sample_rate = sample_rate
         self.index_dict = util.handle_scp(scp_path)

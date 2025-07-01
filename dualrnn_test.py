@@ -13,7 +13,7 @@ import tqdm
 class Separation():
     def __init__(self, mix_path, yaml_path, model, gpuid):
         super(Separation, self).__init__()
-        self.mix = AudioReader(mix_path, sample_rate=8000)
+        self.mix = AudioReader(mix_path, sample_rate=16000)
         opt = parse(yaml_path)
         net = Dual_RNN_model(**opt['Dual_Path_RNN'])
         dicts = torch.load(model, map_location='cpu')
@@ -54,7 +54,7 @@ class Separation():
                     index += 1
                     os.makedirs(file_path+'/spk'+str(index), exist_ok=True)
                     filename=file_path+'/spk'+str(index)+'/'+key
-                    write_wav(filename, s, 8000)
+                    write_wav(filename, s, 16000)
                 break
             self.logger.info("Compute over {:d} utterances".format(len(self.mix)))
 

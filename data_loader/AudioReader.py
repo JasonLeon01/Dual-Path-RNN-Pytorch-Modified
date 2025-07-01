@@ -12,9 +12,9 @@ def read_wav(fname, return_rate=False):
                fname: wav file path
                return_rate: Whether to return the sampling rate
          output:
-                src: output tensor of size C x L 
-                     L is the number of audio frames 
-                     C is the number of channels. 
+                src: output tensor of size C x L
+                     L is the number of audio frames
+                     C is the number of channels.
                 sr: sample rate
     '''
     src, sr = torchaudio.load(fname, channels_first=True)
@@ -44,7 +44,7 @@ class AudioReader(object):
         Output a matrix of wav files in all scp files.
     '''
 
-    def __init__(self, scp_path, sample_rate=8000):
+    def __init__(self, scp_path, sample_rate=16000):
         super(AudioReader, self).__init__()
         self.sample_rate = sample_rate
         self.index_dict = handle_scp(scp_path)

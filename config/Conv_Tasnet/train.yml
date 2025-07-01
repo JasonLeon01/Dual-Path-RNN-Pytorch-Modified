@@ -11,17 +11,17 @@ datasets:
   val:
     dataroot_mix: /home/likai/data1/create_scp/cv_mix.scp
     dataroot_targets: [/home/likai/data1/create_scp/cv_s1.scp,/home/likai/data1/create_scp/cv_s2.scp]
-  
+
   dataloader_setting:
     shuffle: true
     num_workers: 10  # per GPU
     batch_size: 20
-  
+
   audio_setting:
-    sample_rate: 8000
+    sample_rate: 16000
     chunk_size: 32000
     least_size: 16000
-    
+
 
 #### network structures
 Conv_Tasnet:

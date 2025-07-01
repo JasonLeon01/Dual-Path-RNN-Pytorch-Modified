@@ -48,7 +48,7 @@ class Separation():
                 index += 1
                 os.makedirs(file_path+'/spk'+str(index), exist_ok=True)
                 filename=file_path+'/spk'+str(index)+'/'+key
-                write_wav(filename, s, 8000)
+                write_wav(filename, s, 16000)
         self.logger.info("Compute over {:d} utterances".format(len(self.mix)))
 
 
