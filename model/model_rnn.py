@@ -16,8 +16,8 @@ class GlobalLayerNorm(nn.Module):
        dim: (int or list or torch.Size) –
           input shape from an expected input of size
        eps: a value added to the denominator for numerical stability.
-       elementwise_affine: a boolean value that when set to True, 
-          this module has learnable per-element affine parameters 
+       elementwise_affine: a boolean value that when set to True,
+          this module has learnable per-element affine parameters
           initialized to ones (for weights) and zeros (for biases).
     '''
 
@@ -64,7 +64,7 @@ class CumulativeLayerNorm(nn.LayerNorm):
     '''
        Calculate Cumulative Layer Normalization
        dim: you want to norm dim
-       elementwise_affine: learnable per-element affine parameters 
+       elementwise_affine: learnable per-element affine parameters
     '''
 
     def __init__(self, dim, elementwise_affine=True):
@@ -130,8 +130,8 @@ class Encoder(nn.Module):
 class Decoder(nn.ConvTranspose1d):
     '''
         Decoder of the TasNet
-        This module can be seen as the gradient of Conv1d with respect to its input. 
-        It is also known as a fractionally-strided convolution 
+        This module can be seen as the gradient of Conv1d with respect to its input.
+        It is also known as a fractionally-strided convolution
         or a deconvolution (although it is not an actual deconvolution operation).
     '''
 
@@ -162,8 +162,8 @@ class Dual_RNN_Block(nn.Module):
             out_channels: The number of features in the hidden state h
             rnn_type: RNN, LSTM, GRU
             norm: gln = "Global Norm", cln = "Cumulative Norm", ln = "Layer Norm"
-            dropout: If non-zero, introduces a Dropout layer on the outputs 
-                     of each LSTM layer except the last layer, 
+            dropout: If non-zero, introduces a Dropout layer on the outputs
+                     of each LSTM layer except the last layer,
                      with dropout probability equal to dropout. Default: 0
             bidirectional: If True, becomes a bidirectional LSTM. Default: False
     '''
@@ -177,6 +177,9 @@ class Dual_RNN_Block(nn.Module):
             out_channels, hidden_channels, 1, batch_first=True, dropout=dropout, bidirectional=bidirectional)
         self.inter_rnn = getattr(nn, rnn_type)(
             out_channels, hidden_channels, 1, batch_first=True, dropout=dropout, bidirectional=bidirectional)
+#########################################################################################
+        self.attention = nn.MultiheadAttention(embed_dim=out_channels, num_heads=8)
+#########################################################################################
         # Norm
         self.intra_norm = select_norm(norm, out_channels, 4)
         self.inter_norm = select_norm(norm, out_channels, 4)
@@ -185,7 +188,7 @@ class Dual_RNN_Block(nn.Module):
             hidden_channels*2 if bidirectional else hidden_channels, out_channels)
         self.inter_linear = nn.Linear(
             hidden_channels*2 if bidirectional else hidden_channels, out_channels)
-        
+
 
     def forward(self, x):
         '''
@@ -205,7 +208,17 @@ class Dual_RNN_Block(nn.Module):
         # [B, N, K, S]
         intra_rnn = intra_rnn.permute(0, 3, 2, 1).contiguous()
         intra_rnn = self.intra_norm(intra_rnn)
-        
+
+#########################################################################################
+        attention_input = intra_rnn.permute(2, 0, 1, 3).contiguous().view(K, B*N, S)
+        attention_output, _ = self.attention(attention_input, attention_input, attention_input)
+        # [K, B*N, S] -> [B, N, K, S]
+        attention_output = attention_output.view(K, B, N, S).permute(0, 2, 1, 3).contiguous()
+
+        # [B, N, K, S]
+        intra_rnn = intra_rnn + attention_output
+#########################################################################################
+
         # [B, N, K, S]
         intra_rnn = intra_rnn + x
 
@@ -235,8 +248,8 @@ class Dual_Path_RNN(nn.Module):
             out_channels: The number of features in the hidden state h
             rnn_type: RNN, LSTM, GRU
             norm: gln = "Global Norm", cln = "Cumulative Norm", ln = "Layer Norm"
-            dropout: If non-zero, introduces a Dropout layer on the outputs 
-                     of each LSTM layer except the last layer, 
+            dropout: If non-zero, introduces a Dropout layer on the outputs
+                     of each LSTM layer except the last layer,
                      with dropout probability equal to dropout. Default: 0
             bidirectional: If True, becomes a bidirectional LSTM. Default: False
             num_layers: number of Dual-Path-Block
@@ -375,8 +388,8 @@ class Dual_RNN_model(nn.Module):
             kernel_size: Encoder and Decoder Kernel size
             rnn_type: RNN, LSTM, GRU
             norm: gln = "Global Norm", cln = "Cumulative Norm", ln = "Layer Norm"
-            dropout: If non-zero, introduces a Dropout layer on the outputs 
-                     of each LSTM layer except the last layer, 
+            dropout: If non-zero, introduces a Dropout layer on the outputs
+                     of each LSTM layer except the last layer,
                      with dropout probability equal to dropout. Default: 0
             bidirectional: If True, becomes a bidirectional LSTM. Default: False
             num_layers: number of Dual-Path-Block
@@ -393,7 +406,7 @@ class Dual_RNN_model(nn.Module):
                  bidirectional=bidirectional, num_layers=num_layers, K=K, num_spks=num_spks)
         self.decoder = Decoder(in_channels=in_channels, out_channels=1, kernel_size=kernel_size, stride=kernel_size//2, bias=False)
         self.num_spks = num_spks
-    
+
     def forward(self, x):
         '''
            x: [B, L]
