@@ -55,18 +55,18 @@ class Separation():
                     os.makedirs(file_path+'/spk'+str(index), exist_ok=True)
                     filename=file_path+'/spk'+str(index)+'/'+key
                     write_wav(filename, s, 16000)
-                break
+                # break
             self.logger.info("Compute over {:d} utterances".format(len(self.mix)))
 
 
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument(
-        '-mix_scp', type=str, default='../create_scp/tt_mix.scp', help='Path to mix scp file.')
+        '-mix_scp', type=str, default='./tt_mix.scp', help='Path to mix scp file.')
     parser.add_argument(
-        '-yaml', type=str, default='./config/train.yml', help='Path to yaml file.')
+        '-yaml', type=str, default='./config/Conv_Tasnet/train.yml', help='Path to yaml file.')
     parser.add_argument(
-        '-model', type=str, default='./checkpoint/Conv_Tasnet_skip/best.pt', help="Path to model file.")
+        '-model', type=str, default='./checkpoint/Conv_Tasnet/best.pt', help="Path to model file.")
     parser.add_argument(
         '-gpuid', type=str, default='0', help='Enter GPU id number')
     parser.add_argument(
