@@ -56,9 +56,9 @@ def main():
     parser.add_argument(
         '-mix_scp', type=str, default='1_mix.wav', help='Path to mix scp file.')
     parser.add_argument(
-        '-yaml', type=str, default='./config/train_rnn_opt.yml', help='Path to yaml file.')
+        '-yaml', type=str, default='./config/train_rnn.yml', help='Path to yaml file.')
     parser.add_argument(
-        '-model', type=str, default='./checkpoint/Dual_Path_RNN_opt/best.pt', help="Path to model file.")
+        '-model', type=str, default='./checkpoint/Dual_Path_RNN/best.pt', help="Path to model file.")
     parser.add_argument(
         '-gpuid', type=str, default='0', help='Enter GPU id number')
     parser.add_argument(
