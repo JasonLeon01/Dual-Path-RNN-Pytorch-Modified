@@ -58,7 +58,7 @@ class Trainer(object):
                 self.dualrnn.load_state_dict(ckp['model_state_dict'])
             # self.dualrnn = Dual_RNN.to(self.device)
             optimizer.load_state_dict(ckp['optim_state_dict'])
-            self.optimizer = optimizer(self.dualrnn.module.parameters())
+            self.optimizer = optimizer
             lr = self.optimizer.param_groups[0]['lr']
             self.adjust_learning_rate(self.optimizer, lr*0.5)
         else:
