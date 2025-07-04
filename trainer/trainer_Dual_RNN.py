@@ -215,3 +215,11 @@ class Trainer(object):
             'optim_state_dict': self.optimizer.state_dict()
         },
             os.path.join(self.checkpoint, self.name, '{0}.pt'.format('best' if best else 'last')))
+
+    def adjust_learning_rate(self, optimizer, new_lr):
+        """
+        Adjust the learning rate of the optimizer.
+        """
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = new_lr
+        self.logger.info(f"Learning rate adjusted to {new_lr}")
